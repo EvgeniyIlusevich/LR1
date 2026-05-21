@@ -45,6 +45,7 @@ urlpatterns = [
     path('mypurchases/', views.my_purchases, name='my_purchases'),
     path('vacancies/', views.vacancy_list, name='vacancy_list'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('sales/chart/', views.sales_chart, name='sales_chart'),
 ]
 
 if settings.DEBUG:

@@ -346,7 +346,7 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
         }
 
-        canvas#salesChart {
+        .chart-box img {
             max-width: 100%;
             height: auto;
         }
@@ -535,7 +535,9 @@
 
         <h2>Графики и тренды</h2>
         <div class="chart-box">
-            <canvas id="salesChart" width="400" height="200"></canvas>
+            <img src="{% url 'sales_chart' %}{% if selected_city %}?city={{ selected_city }}{% endif %}" 
+                 alt="График динамики продаж"
+                 style="width: 100%; height: auto;">
         </div>
 
         <h2>Ежемесячный объём продаж по категориям</h2>
@@ -551,94 +553,6 @@
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-        // Безопасно выводим сериализованную JSON-строку из контекста Django
-        const monthlySalesData = {{ monthly_sales_json|safe }};
-        
-        // Агрегируем суммарные продажи по месяцам
-        const monthTotals = {};
-        
-        if (Array.isArray(monthlySalesData)) {
-            monthlySalesData.forEach(item => {
-                let monthStr = item.month;
-                
-                if (monthStr) {
-                    // Если это строка (например, "2026-05-01"), отрезаем до "2026-05"
-                    if (typeof monthStr === 'string') {
-                        monthStr = monthStr.slice(0, 7);
-                    } else {
-                        monthStr = String(monthStr).slice(0, 7);
-                    }
-                    
-                    const total = item.total || 0;
-                    if (!monthTotals[monthStr]) monthTotals[monthStr] = 0;
-                    monthTotals[monthStr] += total;
-                }
-            });
-        }
-        
-        const sortedMonths = Object.keys(monthTotals).sort();
-        const labels = sortedMonths;
-        const data = sortedMonths.map(m => monthTotals[m]);
-        
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Объём продаж (шт.)',
-                    data: data,
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true,
-                    pointBackgroundColor: '#6366f1',
-                    pointBorderColor: '#fff',
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { labels: { color: '#f8fafc' } },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: '#1e293b',
-                        titleColor: '#f8fafc',
-                        bodyColor: '#cbd5e1'
-                    }
-                },
-                scales: {
-                    y: {
-                        ticks: { color: '#94a3b8' },
-                        grid: { color: '#334155' },
-                        title: {
-                            display: true,
-                            text: 'Количество проданных единиц',
-                            color: '#94a3b8'
-                        },
-                        beginAtZero: true
-                    },
-                    x: {
-                        ticks: { color: '#94a3b8' },
-                        grid: { color: '#334155' },
-                        title: {
-                            display: true,
-                            text: 'Месяц',
-                            color: '#94a3b8'
-                        }
-                    }
-                }
-            }
-        });
-    </script>
     <script src="{% static 'js/navigation.js' %}"></script>
 </body>
 </html>
-```</QuerySet>

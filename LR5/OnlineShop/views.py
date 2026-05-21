@@ -1,12 +1,19 @@
-import json  # Добавили для работы с JSON
+import json
 from decimal import Decimal
 from statistics import mean, median, mode, StatisticsError
+import io
 
 import requests
+import matplotlib
+
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+from django.http import HttpResponse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.serializers.json import DjangoJSONEncoder  # Добавили для кодирования дат
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from django.db.models import Sum, F
 from django.db.models.functions import TruncMonth
@@ -44,7 +51,6 @@ def get_random_joke():
 def product_list(request):
     products = Product.objects.all()
     
-    # Лаконичная фильтрация через словарь
     filters = {}
     if min_price := request.GET.get('min_price'):
         filters['price__gte'] = min_price
@@ -137,6 +143,7 @@ def buy_product(request, product_id):
 
     return render(request, 'buy_product.html', {'form': form, 'product': product})
 
+
 @staff_member_required
 def sale_list(request):
     selected_city = request.GET.get('city')
@@ -193,9 +200,6 @@ def sale_list(request):
         total=Sum('quantity')
     ).order_by('month')
 
-    # ИСПРАВЛЕНИЕ ТУТ: Принудительно конвертируем QuerySet в список и кодируем в правильный JSON-формат
-    monthly_sales_json = json.dumps(list(monthly_sales), cls=DjangoJSONEncoder)
-
     return render(request, 'sale_list.html', {
         'sales': sales,
         'unique_cities': unique_cities,
@@ -209,8 +213,48 @@ def sale_list(request):
         'most_demanded_product_name': most_demanded_product_name,
         'unsold_products': unsold_products,
         'monthly_sales': monthly_sales,
-        'monthly_sales_json': monthly_sales_json,  # Передали очищенный JSON для фронтенда
     })
+
+
+@staff_member_required
+def sales_chart(request):
+    selected_city = request.GET.get('city', '')
+    qs = SaleProduct.objects.all()
+    if selected_city:
+        qs = qs.filter(sale__city=selected_city)
+
+    monthly_sales = qs.annotate(
+        month=TruncMonth('sale__sale_date')
+    ).values('month').annotate(
+        total=Sum('quantity')
+    ).order_by('month')
+
+    months = []
+    totals = []
+    for item in monthly_sales:
+        months.append(item['month'].strftime('%Y-%m'))
+        totals.append(float(item['total']))
+
+    if not months:
+        months = ['Нет данных']
+        totals = [0]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(months, totals, marker='o', linestyle='-', color='#6366f1', linewidth=2, markersize=6)
+    ax.fill_between(months, totals, alpha=0.2, color='#6366f1')
+    ax.set_title('Динамика продаж по месяцам', fontsize=14)
+    ax.set_xlabel('Месяц', fontsize=12)
+    ax.set_ylabel('Количество проданных единиц', fontsize=12)
+    ax.grid(True, linestyle='--', alpha=0.5)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    plt.close()
+
+    return HttpResponse(buf, content_type='image/png')
 
 
 def latest_article(request):
