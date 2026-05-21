@@ -6,12 +6,15 @@ services:
     container_name: online_shop
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
-      - ./db.sqlite3:/app/db.sqlite3
-      - ./media:/app/media
     environment:
       - DJANGO_SETTINGS_MODULE=LR5.settings
-      - DEBUG=1
+      - DEBUG=0
+      - PORT=8000
+      - DATABASE_URL=${DATABASE_URL}      # Переменная должна быть определена в окружении Render
+      - SECRET_KEY=${SECRET_KEY}          # Аналогично для секретного ключа
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn LR5.wsgi:application --bind 0.0.0.0:$PORT"
     stdin_open: true
     tty: true

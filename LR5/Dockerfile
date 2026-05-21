@@ -5,16 +5,23 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
+# Установка системных зависимостей (для Pillow, psycopg2 и др.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg-dev \
     zlib1g-dev \
+    libpq-dev \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Копирование и установка зависимостей Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Копирование всего проекта
 COPY . .
 
-EXPOSE 8000
+# Сбор статики (WhiteNoise)
+RUN python manage.py collectstatic --noinput
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Запуск через Gunicorn (вместо runserver)
+CMD ["sh", "-c", "python manage.py migrate && gunicorn LR5.wsgi:application --bind 0.0.0.0:$PORT"]
