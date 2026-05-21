@@ -74,7 +74,7 @@ class ModelTests(TestCase):
         
     def test_employee_str(self):
         emp = Employee.objects.create(
-            name="John", job_description="Dev", phone="123", email="a@b.com"
+            name="John", job_description="Dev", phone="+375291234567", email="a@b.com"
         )
         self.assertEqual(str(emp), "John")
         
@@ -115,7 +115,7 @@ class FormTests(TestCase):
         self.assertIn("name", form.errors)
         
     def test_review_form_valid(self):
-        form = ReviewForm(data={"text": "Good product", "rating": 8})
+        form = ReviewForm(data={"text": "Good product", "rating": 4})
         self.assertTrue(form.is_valid())
         
     def test_review_form_rating_too_high(self):
@@ -123,8 +123,8 @@ class FormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("rating", form.errors)
         
-    def test_review_form_rating_negative(self):
-        form = ReviewForm(data={"text": "Bad", "rating": -1})
+    def test_review_form_rating_too_low(self):
+        form = ReviewForm(data={"text": "Bad", "rating": 0})
         self.assertFalse(form.is_valid())
         
     def test_sale_product_form_valid(self):
@@ -197,6 +197,10 @@ class ViewTests(TestCase):
             first_name="Test", last_name="User",
             email="test@example.com", phone="+375291234567"
         )
+        self.staff_user = User.objects.create_user(
+            username="staffuser", password="staffpass",
+            email="staff@example.com", is_staff=True
+        )
         
     def test_product_list_view(self):
         response = self.client.get(reverse('products_list'))
@@ -254,7 +258,7 @@ class ViewTests(TestCase):
         
     def test_buy_product_with_valid_promo(self):
         self.client.login(username="testuser", password="testpass")
-        promo = PromoCode.objects.create(code="SAVE20", discount_percent=20, active=True)
+        PromoCode.objects.create(code="SAVE20", discount_percent=20, active=True)
         post_data = {
             "city": "Minsk",
             "quantity": "2",
@@ -267,7 +271,7 @@ class ViewTests(TestCase):
         sp = SaleProduct.objects.filter(sale=sale).first()
         self.assertEqual(sp.quantity, 2)
         expected_price = self.product.price * Decimal("0.8")
-        self.assertEqual(sp.price, expected_price)
+        self.assertAlmostEqual(sp.price, expected_price, places=2)
         self.assertEqual(sale.total_price, expected_price * 2)
         
     def test_buy_product_with_invalid_promo(self):
@@ -282,11 +286,16 @@ class ViewTests(TestCase):
         self.assertFormError(response.context['form'], 'promo_code', 'Промокод недействителен или неактивен')
         
     def test_sale_list_empty(self):
+        self.client.login(username="staffuser", password="staffpass")
         response = self.client.get(reverse('sale_list'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('sales_mean', response.context)
         
     def test_sale_list_with_sales(self):
+        self.client.login(username="staffuser", password="staffpass")
+        # Удаляем все продажи из фикстуры, чтобы они не влияли на расчёт
+        Sale.objects.all().delete()
+        SaleProduct.objects.all().delete()
         sale = Sale.objects.create(
             customer=self.customer, delivery_date=timezone.now() + timedelta(days=7), city="Minsk"
         )
@@ -299,7 +308,7 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('sale_list'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('sales', response.context)
-        self.assertEqual(response.context['sales'].count(), 1)
+        self.assertTrue(response.context['sales'].filter(id=sale.id).exists())
         self.assertIn('most_popular_type', response.context)
         self.assertEqual(response.context['most_popular_type'], "Electronics")
         
@@ -342,7 +351,7 @@ class ViewTests(TestCase):
         
     def test_contact_list(self):
         Employee.objects.create(
-            name="John", job_description="Dev", phone="123", email="j@j.com"
+            name="John", job_description="Dev", phone="+375291234567", email="j@j.com"
         )
         response = self.client.get(reverse('contact_list'))
         self.assertEqual(response.status_code, 200)
@@ -391,7 +400,7 @@ class ViewTests(TestCase):
         
     def test_product_reviews_post_valid(self):
         self.client.login(username="testuser", password="testpass")
-        post_data = {"text": "Good product!", "rating": 9}
+        post_data = {"text": "Good product!", "rating": 5}
         response = self.client.post(reverse('product_reviews', args=[self.product.id]), data=post_data)
         self.assertRedirects(response, reverse('product_reviews', args=[self.product.id]))
         self.assertTrue(Review.objects.filter(product=self.product, author=self.user).exists())

@@ -1,0 +1,21 @@
+[run]
+source = OnlineShop
+omit = 
+    */migrations/*
+    */tests.py
+    manage.py
+
+[report]
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    def __str__
+    def __repr__
+    if self\.debug:
+    if settings\.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if False:
+    @property
+    @abstractmethod

@@ -123,8 +123,8 @@ def buy_product(request, product_id):
 
         customer = get_object_or_404(Customer, email=request.user.email)
         quantity = form.cleaned_data['quantity']
-        price_with_discount = product.price * (Decimal('1.00') - discount)
-        total_price = price_with_discount * quantity
+        price_with_discount = round(product.price * (Decimal('1.00') - discount), 2)
+        total_price = round(price_with_discount * quantity, 2)
 
         sale = Sale.objects.create(
             city=form.cleaned_data.get('city'),

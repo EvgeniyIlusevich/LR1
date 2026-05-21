@@ -22,10 +22,10 @@ class ReviewForm(forms.ModelForm):
 
     def clean_rating(self):
         rating = self.cleaned_data['rating']
-        if rating < 0:
-            raise ValidationError("Рейтинг не может быть меньше 0.")
-        if rating > 10:
-            raise ValidationError("Рейтинг не может быть больше 10.")
+        if rating < 1:
+            raise ValidationError("Рейтинг не может быть меньше 1.")
+        if rating > 5:
+            raise ValidationError("Рейтинг не может быть больше 5.")
         return rating
 
 
