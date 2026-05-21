@@ -1,0 +1,9 @@
+{
+  "ENV": "prod",
+  "APP_PORT": 8080,
+  "DB": {
+    "USERNAME": "",
+    "HOST": "",
+    "PORT"....
+  }
+}

@@ -1,0 +1,113 @@
+Данных
+Хранения данных
+Логики управления этими данными
+
+Заказы
+Пользователи
+КарточкиТоваров
+
+
+
+API     // post /api/v1/create_user {} // валдиация данных, работа мидлварей, работа различных рейт лимитеров  UserDTO
+ |
+business logic (service) // сходить в базу, проверить что пользователь не существует, проверить еще кучу разных штук, и если пользователя нет - > зарегистрировать его
+ |
+repository (dao - data access object) // делает sql запрос в базу, или no sql
+
+
+а о каких данных в принципе идет речь?
+
+и вот тут у нас появляется такое понятие как МОДЕЛЬ ДАННЫХ
+
+
+type UserDTO struct {
+    Name string
+    LastName string
+    Age string
+}
+
+type User struct {
+    ID string
+    CreatedAt time.Time
+    LastLogin time.Time
+    Name string
+    LastName string
+    Age string
+}
+
+
+
+
+REST / gRPC
+
+
+Service A
+чуваки, ко мне можно ходить только вот так
+
+post /api/v1/create_user
+
+{
+    name: string  // Require
+    age: int // Require
+    citizenship: string
+}
+
+
+Service B
+http 1.1
+
+
+gRPC
+
+method CreateUser
+
+{
+    name: string  // Require
+    age: int // Require
+    citizenship: string
+}
+
+
+http 2
+
+-json-, а вместо него бинарный протокол, который весит в полтора-два раза меньше
+
+
+protobuf, лежит где-нибудь на гитлабе, возьмите его, сгенерируйте себе клиент. И все будет чики пуки
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

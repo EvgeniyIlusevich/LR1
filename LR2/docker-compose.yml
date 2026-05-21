@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taxiservice_app
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.example
+    ports:
+      - "50051:50051"
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    container_name: taxiservice_db
+    env_file:
+      - .env.example
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

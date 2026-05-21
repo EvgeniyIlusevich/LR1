@@ -1,0 +1,55 @@
+version: "3"
+
+vars:
+  APP_BINARY: taxiservice.exe
+  DOCKER_IMAGE: taxiservice:local
+
+tasks:
+  deps:
+    desc: Download go dependencies
+    env:
+      GOCACHE: "{{.USER_WORKING_DIR}}/.gocache"
+      GOMODCACHE: "{{.USER_WORKNG_DIR}}/.gomodcache"
+    cmds:
+      - go mod download
+
+  build:
+    desc: Build local windows binary
+    env:
+      GOCACHE: "{{.USER_WORKING_DIR}}/.gocache"
+      GOMODCACHE: "{{.USER_WORKNG_DIR}}/.gomodcache"
+    cmds:
+      - go build -o {{.APP_BINARY}} ./cmd
+
+  docker:build:
+    desc: Build docker image
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}} .
+
+  logs:
+    desc: Tail docker compose logs
+    cmds:
+      - docker compose logs -f app db
+
+  test:
+    desc: Run go tests
+    env:
+      GOCACHE: "{{.USER_WORKING_DIR}}/.gocache"
+      GOMODCACHE: "{{.USER_WORKNG_DIR}}/.gomodcache"
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run golangci-lint in Docker
+    cmds:
+      - docker run --rm -v "{{.USER_WORKING_DIR}}:/app" -w /app golangci/golangci-lint:v2.5.0 golangci-lint run ./...
+
+  up:
+    desc: Start app and postgres in docker compose
+    cmds:
+      - docker compose up --build -d
+
+  down:
+    desc: Stop docker compose
+    cmds:
+      - docker compose down
