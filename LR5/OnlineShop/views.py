@@ -12,7 +12,7 @@ from django.db.models import Sum, F
 from django.db.models.functions import TruncMonth
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-
+from django.contrib.admin.views.decorators import staff_member_required
 from .forms import CustomUserCreationForm, ProductEdit, SaleProductForm, ReviewForm
 from .models import Product, Customer, Sale, SaleProduct, Article, FAQ, Employee, Review, PromoCode, Category, Vacancy
 
@@ -137,7 +137,7 @@ def buy_product(request, product_id):
 
     return render(request, 'buy_product.html', {'form': form, 'product': product})
 
-
+@staff_member_required
 def sale_list(request):
     selected_city = request.GET.get('city')
     sales = Sale.objects.select_related('customer').prefetch_related('saleproduct_set__product')
