@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>О компании</title>
+    
+    <!-- Шрифты и иконки -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+
+    <style>
+        /* Современные CSS-переменные для темной темы */
+        :root {
+            --bg-main: #0f172a;       /* Глубокий темно-синий/серый */
+            --bg-card: #1e293b;       /* Цвет карточек */
+            --bg-navbar: rgba(15, 23, 42, 0.8); /* Полупрозрачный навар */
+            --accent: #6366f1;        /* Индиго для активных элементов */
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;     /* Белый текст */
+            --text-muted: #94a3b8;    /* Серый текст для второстепенных данных */
+            --border: #334155;        /* Тонкие границы */
+            --radius: 12px;           /* Скругление углов */
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; /* Отступ под фиксированный navbar */
+        }
+
+        /* Стильный фиксированный Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(12px); /* Эффект размытия стекла */
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Контейнер для ссылок с авто-скроллом, если они не влезают в экран */
+        .left-items {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            scrollbar-width: none; /* Прячем скроллбар в Firefox */
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none; /* Прячем скроллбар в Chrome/Safari */
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        /* Блок авторизации */
+        .auth-block {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .auth-block span {
+            color: var(--text-muted);
+        }
+
+        .auth-block a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .auth-block a:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+            border-color: var(--text-main);
+        }
+
+        /* Основной контейнер */
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            letter-spacing: -0.05em;
+        }
+
+        /* Сетка секций */
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Информационная строка-заглушка */
+        .placeholder-text {
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Пункты самовывоза (выделены в полную ширину) */
+        .pickup-section {
+            grid-column: 1 / -1;
+        }
+
+        .pickup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .pickup-point {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .pickup-point:hover {
+            background: rgba(99, 102, 241, 0.05);
+            border-color: var(--accent);
+        }
+
+        .pickup-point strong {
+            color: var(--accent);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            body {
+                padding-top: 130px; /* Больше места для перенесенного блока авторизации */
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            .left-items {
+                width: 100%;
+            }
+            .auth-block {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="left-items">
+        <a href="#" id="latest" class="tab">Последнее</a>
+        <a href="#" id="about" class="tab active">О нас</a>
+        <a href="#" id="news" class="tab">Новости</a>
+        <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
+        <a href="#" id="faq" class="tab">FAQ</a>
+        <a href="#" id="contacts" class="tab">Контакты</a>
+        <a href="#" id="products" class="tab">Товары</a>
+        <a href="#" id="gif" class="tab">GIF</a>
+        <a href="#" id="rand" class="tab">Шутки</a>
+        <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+        
+        {% if user.is_authenticated and not user.is_staff %}
+            <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
+        {% endif %}
+        {% if user.is_staff %}
+            <a href="#" id="sales" class="tab">Продажи</a>
+        {% endif %}
+    </div>
+
+    <div class="auth-block">
+        {% if user.is_authenticated %}
+            <span>Привет, <strong>{{ user.username }}</strong>!</span>
+            <a href="/logout">Выйти</a>
+        {% else %}
+            <a href="/login">Войти</a>
+        {% endif %}
+    </div>
+</nav>
+
+<main class="container">
+    <h1>О компании</h1>
+    
+    <div class="about-grid">
+        <!-- Карточка 1: Описание -->
+        <div class="card">
+            <h2>Информация</h2>
+            <p>Наша компания специализируется на высококачественной дистрибуции и продаже бытовой химии через Интернет. Мы делаем упор на экологичность и скорость доставки.</p>
+        </div>
+
+        <!-- Карточка 2: Логотип -->
+        <div class="card">
+            <h2>Логотип</h2>
+            <p class="placeholder-text">*** Место для вашего фирменного логотипы *** — STRWEB</p>
+        </div>
+
+        <!-- Карточка 3: История -->
+        <div class="card">
+            <h2>История по годам</h2>
+            <p class="placeholder-text">*** Здесь развернется хронология нашего успеха *** — STRWEB</p>
+        </div>
+
+        <!-- Карточка 4: Реквизиты -->
+        <div class="card">
+            <h2>Реквизиты</h2>
+            <p class="placeholder-text">*** Официальные юридические данные компании *** — STRWEB</p>
+        </div>
+
+        <!-- Карточка 5: Пункты самовывоза (на всю ширину сетки) -->
+        <div class="card pickup-section">
+            <h2>Пункты самовывоза в Минске</h2>
+            <div class="pickup-grid">
+                <div class="pickup-point">
+                    <strong>Пункт №1</strong>
+                    <span>г. Минск, ул. Немига, 5 (м. «Немига»)</span>
+                </div>
+                <div class="pickup-point">
+                    <strong>Пункт №2</strong>
+                    <span>г. Минск, пр-т Независимости, 58 (пл. Я. Коласа)</span>
+                </div>
+                <div class="pickup-point">
+                    <strong>Пункт №3</strong>
+                    <span>г. Минск, ул. Притыцкого, 97 (м. «Каменная Горка»)</span>
+                </div>
+                <div class="pickup-point">
+                    <strong>Пункт №4</strong>
+                    <span>г. Минск, ул. Богуцкого, 2 (Сухарево)</span>
+                </div>
+                <div class="pickup-point">
+                    <strong>Пункт №5</strong>
+                    <span>г. Минск, ул. Логойский тракт, 37 (рядом с ProStore)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>

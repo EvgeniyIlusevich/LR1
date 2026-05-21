@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель аналитики и продаж</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-navbar: rgba(15, 23, 42, 0.8);
+            --accent: #6366f1;
+            --accent-light: rgba(99, 102, 241, 0.15);
+            --success: #10b981;
+            --danger: #f87171;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --radius: 16px;
+            --transition: all 0.25s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .left-items {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        .sp-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sp-auth span {
+            color: var(--text-muted);
+        }
+
+        .sp-auth a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .sp-auth a:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+            border-color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1.25rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-bar {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .filter-bar select {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .filter-bar button {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 0.55rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .filter-bar button:hover {
+            background-color: #4f46e5;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .metric-value.highlight {
+            color: var(--success);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .table th {
+            background-color: rgba(15, 23, 42, 0.5);
+            padding: 1rem 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .table td {
+            padding: 1.1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+            vertical-align: top;
+        }
+
+        .table tbody tr:hover td {
+            background-color: rgba(255, 255, 255, 0.01);
+        }
+
+        .table ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .table ul li {
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            position: relative;
+            padding-left: 0.85rem;
+        }
+
+        .table ul li::before {
+            content: "•";
+            color: var(--accent);
+            position: absolute;
+            left: 0;
+        }
+
+        .price-text {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+        }
+
+        .info-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .data-list {
+            list-style: none;
+        }
+
+        .data-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.65rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.95rem;
+        }
+
+        .data-list li:last-child {
+            border-bottom: none;
+        }
+
+        .data-list .val {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .badge-danger {
+            background-color: rgba(248, 113, 113, 0.1);
+            color: var(--danger);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .chart-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        canvas#salesChart {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            body {
+                padding-top: 130px;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            .left-items {
+                width: 100%;
+            }
+            .sp-auth {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            .container {
+                margin: 1.5rem auto;
+            }
+            .chart-box {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="left-items">
+            <a href="#" id="latest" class="tab">Последнее</a>
+            <a href="#" id="about" class="tab">О нас</a>
+            <a href="#" id="news" class="tab">Новости</a>
+            <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
+            <a href="#" id="faq" class="tab">FAQ</a>
+            <a href="#" id="contacts" class="tab">Контакты</a>
+            <a href="#" id="products" class="tab">Товары</a>
+            <a href="#" id="gif" class="tab">GIF</a>
+            <a href="#" id="rand" class="tab">Шутки</a>
+            <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+            
+            {% if user.is_authenticated and not user.is_staff %}
+                <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="#" id="sales" class="tab active">Продажи</a>
+            {% endif %}
+        </div>
+        
+        <div class="sp-auth">
+            {% if user.is_authenticated %}
+                <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Панель аналитики и продаж</h1>
+
+        <div class="filter-bar">
+            <form method="get" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; width: 100%;">
+                <label for="city">Региональный фильтр:</label>
+                <select name="city" id="city">
+                    <option value="">Все города</option>
+                    {% for c in unique_cities %}
+                        <option value="{{ c }}" {% if c == selected_city %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Применить</button>
+            </form>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <span class="metric-label">Средний чек</span>
+                <span class="metric-value highlight">{{ sales_mean }} BYN</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Медиана продаж</span>
+                <span class="metric-value">{{ sales_median }} BYN</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Мода продаж</span>
+                <span class="metric-value">{{ sales_mode }}</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Популярный тип</span>
+                <span class="metric-value" style="font-size: 1.1rem; font-weight: 700; margin-top: 0.3rem;">{{ most_popular_type }}</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Прибыльный тип</span>
+                <span class="metric-value highlight" style="font-size: 1.1rem; font-weight: 700; margin-top: 0.3rem;">{{ most_profitable_type }}</span>
+            </div>
+        </div>
+
+        <h2>История торговых операций</h2>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Покупатель</th>
+                        <th>Email</th> 
+                        <th>Телефон</th>  
+                        <th>Дата продажи</th>
+                        <th>Дата доставки</th>
+                        <th>Город</th>
+                        <th>Товары</th>
+                        <th>Итого</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                        <tr>
+                            <td><strong>{{ sale.customer.first_name }} {{ sale.customer.last_name }}</strong></td>
+                            <td>{{ sale.customer.email }}</td> 
+                            <td>{{ sale.customer.phone }}</td>  
+                            <td>{{ sale.sale_date|date:"Y-m-d" }}</td>
+                            <td>{{ sale.delivery_date|date:"Y-m-d" }}</td>
+                            <td>{{ sale.city }}</td>
+                            <td>
+                                <ul>
+                                    {% for sale_product in sale.saleproduct_set.all %}
+                                        <li>{{ sale_product.product.name }}
+                                            — {{ sale_product.quantity }} {{ sale_product.product.get_unit_display }}
+                                            ({{ sale_product.price }})
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td class="price-text">{{ sale.total_price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="info-card">
+                <h3>Продажи по клиентам</h3>
+                <ul class="data-list">
+                    {% for name, total in sales_total_by_customer.items %}
+                        <li>
+                            <span>👤 {{ name }}</span>
+                            <span class="val">{{ total }} BYN</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>Анализ востребованности</h3>
+                <ul class="data-list" style="margin-bottom: 1.5rem;">
+                    <li>
+                        <span style="color: var(--success);">🔥 Топ спроса:</span>
+                        <span class="val">{{ most_demanded_product_name }}</span>
+                    </li>
+                </ul>
+                
+                <h3 style="font-size: 1rem; border-bottom: none; margin-bottom: 0.5rem; color: var(--text-muted);">Товары без продаж:</h3>
+                <ul class="data-list">
+                    {% if unsold_products %}
+                        {% for p in unsold_products %}
+                            <li>
+                                <span>📦 {{ p.name }}</span>
+                                <span class="badge-danger">Нет спроса</span>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li><span>Все имеющиеся товары были успешно проданы.</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <h2>Графики и тренды</h2>
+        <div class="chart-box">
+            <canvas id="salesChart" width="400" height="200"></canvas>
+        </div>
+
+        <h2>Ежемесячный объём продаж по категориям</h2>
+        <div class="info-card" style="margin-top: 1rem;">
+            <ul class="data-list">
+                {% for item in monthly_sales %}
+                    <li>
+                        <span>📅 {{ item.month|date:"Y-m" }} — <strong>{{ item.product__category__name }}</strong></span>
+                        <span class="val" style="color: var(--accent);">{{ item.total }} шт. продано</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Безопасно выводим сериализованную JSON-строку из контекста Django
+        const monthlySalesData = {{ monthly_sales_json|safe }};
+        
+        // Агрегируем суммарные продажи по месяцам
+        const monthTotals = {};
+        
+        if (Array.isArray(monthlySalesData)) {
+            monthlySalesData.forEach(item => {
+                let monthStr = item.month;
+                
+                if (monthStr) {
+                    // Если это строка (например, "2026-05-01"), отрезаем до "2026-05"
+                    if (typeof monthStr === 'string') {
+                        monthStr = monthStr.slice(0, 7);
+                    } else {
+                        monthStr = String(monthStr).slice(0, 7);
+                    }
+                    
+                    const total = item.total || 0;
+                    if (!monthTotals[monthStr]) monthTotals[monthStr] = 0;
+                    monthTotals[monthStr] += total;
+                }
+            });
+        }
+        
+        const sortedMonths = Object.keys(monthTotals).sort();
+        const labels = sortedMonths;
+        const data = sortedMonths.map(m => monthTotals[m]);
+        
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Объём продаж (шт.)',
+                    data: data,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { labels: { color: '#f8fafc' } },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#cbd5e1'
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' },
+                        title: {
+                            display: true,
+                            text: 'Количество проданных единиц',
+                            color: '#94a3b8'
+                        },
+                        beginAtZero: true
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' },
+                        title: {
+                            display: true,
+                            text: 'Месяц',
+                            color: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>
+```</QuerySet>

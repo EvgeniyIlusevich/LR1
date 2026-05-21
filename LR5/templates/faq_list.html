@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ List</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <style>
+        /* Переменные фирменного темного стиля */
+        :root {
+            --bg-main: #0f172a;       /* Глубокий темный фон */
+            --bg-card: #1e293b;       /* Фон карточки вопроса */
+            --bg-navbar: rgba(15, 23, 42, 0.8);
+            --accent: #6366f1;        /* Индиго */
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;     /* Светлый текст */
+            --text-muted: #94a3b8;    /* Приглушенный текст */
+            --border: #334155;
+            --radius: 12px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; /* Отступ под фиксированный navbar */
+        }
+
+        /* Навигационная панель (общий стиль для всего сайта) */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .left-items {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        .sp-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sp-auth span {
+            color: var(--text-muted);
+        }
+
+        .sp-auth a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .sp-auth a:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+            border-color: var(--text-main);
+        }
+
+        /* Контейнер контента */
+        .container {
+            max-width: 850px; 
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Заголовки */
+        .header-block {
+            margin-bottom: 2.5rem;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.04em;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        /* Сетка элементов FAQ */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Современный интерактивный блок вопроса-ответа */
+        .faq-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Стилизация вопроса */
+        .faq-question {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        /* Символ-индикатор перед вопросом */
+        .faq-question::before {
+            content: "✦";
+            color: var(--accent);
+        }
+
+        /* Стилизация ответа */
+        .faq-answer {
+            color: #cbd5e1; /* Оптимальный цвет для чтения длинных текстов */
+            font-size: 0.98rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        /* Мета-данные (Дата) */
+        .faq-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-left: 1.5rem;
+        }
+
+        .faq-date {
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Адаптивность для смартфонов */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            body {
+                padding-top: 130px;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            .left-items {
+                width: 100%;
+            }
+            .sp-auth {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            h1 {
+                font-size: 1.85rem;
+            }
+            h2 {
+                font-size: 1rem;
+            }
+            .faq-item {
+                padding: 1.25rem;
+            }
+            .faq-question {
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="left-items">
+            <a href="#" id="latest" class="tab">Последнее</a>
+            <a href="#" id="about" class="tab">О нас</a>
+            <a href="#" id="news" class="tab">Новости</a>
+            <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
+            <a href="#" id="faq" class="tab active">FAQ</a>
+            <a href="#" id="contacts" class="tab">Контакты</a>
+            <a href="#" id="products" class="tab">Товары</a>
+            <a href="#" id="gif" class="tab">GIF</a>
+            <a href="#" id="rand" class="tab">Шутки</a>
+            <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+            
+            {% if user.is_authenticated and not user.is_staff %}
+                <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="#" id="sales" class="tab">Продажи</a>
+            {% endif %}
+        </div>
+
+        <div class="sp-auth">
+            {% if user.is_authenticated %}
+                <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="header-block">
+            <h1>Словарь терминов и понятий</h1>
+            <h2>Список часто задаваемых вопросов и ответов на них</h2>
+        </header>
+        
+        <div class="faq-list">
+            {% for faq in faqs %}
+                <div class="faq-item">
+                    <h3 class="faq-question">{{ faq.question }}</h3>
+                    <div class="faq-answer">
+                        {{ faq.answer }}
+                    </div>
+                    <div class="faq-footer">
+                        <span class="faq-date">Добавлено: {{ faq.date_added }}</span>
+                    </div>
+                </div>
+            {% empty %}
+                <p style="color: var(--text-muted);">Раздел FAQ пуст. Вопросы появятся позже.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>

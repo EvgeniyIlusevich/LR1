@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Случайный GIF</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+
+    <style>
+        /* Переменные фирменного темного стиля */
+        :root {
+            --bg-main: #0f172a;       /* Глубокий темный фон */
+            --bg-card: #1e293b;       /* Фон подложки для GIF */
+            --bg-navbar: rgba(15, 23, 42, 0.8);
+            --accent: #6366f1;        /* Индиго */
+            --text-main: #f8fafc;     /* Светлый текст */
+            --text-muted: #94a3b8;    /* Приглушенный текст */
+            --border: #334155;
+            --radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; /* Отступ под фиксированный navbar */
+        }
+
+        /* Навигационная панель (общий стиль для всего сайта) */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .left-items {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        .sp-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sp-auth span {
+            color: var(--text-muted);
+        }
+
+        .sp-auth a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .sp-auth a:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+            border-color: var(--text-main);
+        }
+
+        /* Контейнер контента */
+        .container {
+            max-width: 1000px; /* Максимальная желаемая ширина медиа-зоны */
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Медиа-контейнер для GIF */
+        .gif-display-card {
+            width: 100%;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .gif-display-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.1);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: "🎬";
+            font-size: 1.3rem;
+        }
+
+        /* Обертка для изображения с эффектом кинотеатра */
+        .gif-wrapper {
+            position: relative;
+            background-color: #0b0f19;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 100%;
+        }
+
+        /* Умная адаптивная картинка */
+        .gif-wrapper img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        /* Заглушка, если анимация не передана */
+        .no-gif-message {
+            color: var(--text-muted);
+            padding: 3rem 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* Адаптивность для мобильных телефонов */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            body {
+                padding-top: 130px;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            .left-items {
+                width: 100%;
+            }
+            .sp-auth {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            .container {
+                margin: 1.5rem auto;
+            }
+            .gif-display-card {
+                padding: 1.25rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="left-items">
+            <a href="#" id="latest" class="tab">Последнее</a>
+            <a href="#" id="about" class="tab">О нас</a>
+            <a href="#" id="news" class="tab">Новости</a>
+            <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
+            <a href="#" id="faq" class="tab">FAQ</a>
+            <a href="#" id="contacts" class="tab">Контакты</a>
+            <a href="#" id="products" class="tab">Товары</a>
+            <a href="#" id="gif" class="tab active">GIF</a>
+            <a href="#" id="rand" class="tab">Шутки</a>
+            <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+            
+            {% if user.is_authenticated and not user.is_staff %}
+                <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="#" id="sales" class="tab">Продажи</a>
+            {% endif %}
+        </div>
+
+        <div class="sp-auth">
+            {% if user.is_authenticated %}
+                <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        {% if random_gif_url %}
+            <div class="gif-display-card">
+                <h2>Случайная анимация</h2>
+                
+                <div class="gif-wrapper">
+                    <img src="{{ random_gif_url }}" alt="Случайный GIF" />
+                </div>
+            </div>
+        {% else %}
+            <div class="gif-display-card">
+                <p class="no-gif-message">Не удалось загрузить анимацию. Попробуйте обновить страницу позднее.</p>
+            </div>
+        {% endif %}
+    </main>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>

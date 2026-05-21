@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы о товаре — {{ product.name }}</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+
+    <style>
+        /* Переменные фирменного темного стиля */
+        :root {
+            --bg-main: #0f172a;       /* Глубокий темный фон */
+            --bg-card: #1e293b;       /* Фон отзывов и формы */
+            --bg-navbar: rgba(15, 23, 42, 0.8);
+            --accent: #6366f1;        /* Индиго */
+            --accent-hover: #4f46e5;
+            --warning: #f59e0b;       /* Золотой/Желтый для звезд рейтинга */
+            --text-main: #f8fafc;     /* Светлый текст */
+            --text-muted: #94a3b8;    /* Приглушенный текст */
+            --border: #334155;
+            --radius: 16px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; /* Отступ под фиксированный navbar */
+        }
+
+        /* Навигационная панель */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .left-items {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        .sp-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sp-auth span {
+            color: var(--text-muted);
+        }
+
+        .sp-auth a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .sp-auth a:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+            border-color: var(--text-main);
+        }
+
+        /* Контейнер контента */
+        .container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.3;
+        }
+
+        .btn-back {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            color: var(--text-main);
+            border-color: var(--text-muted);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Лента отзывов */
+        .reviews-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 3.5rem;
+        }
+
+        /* Карточка отзыва */
+        .review-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+
+        .review-card:hover {
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.75rem;
+        }
+
+        .review-author {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Отображение рейтинга */
+        .review-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            padding: 0.25rem 0.65rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .review-text {
+            font-size: 1rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .empty-reviews {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 1rem;
+            background-color: rgba(30, 41, 59, 0.4);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius);
+            font-size: 1.05rem;
+        }
+
+        /* Блок добавления отзыва */
+        .add-review-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .add-review-box h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        /* Красивая стилизация полей встроенной Django формы */
+        .add-review-box form p {
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .add-review-box form label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Стили для текстовых полей, textarea и select-ов внутри формы */
+        .add-review-box form input[type="text"],
+        .add-review-box form textarea,
+        .add-review-box form select {
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .add-review-box form textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .add-review-box form input:focus,
+        .add-review-box form textarea:focus,
+        .add-review-box form select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Кнопка отправки */
+        .btn-submit-review {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 0.85rem 1.75rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit-review:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Адаптивность для мобильных телефонов */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            body {
+                padding-top: 130px;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            .left-items {
+                width: 100%;
+            }
+            .sp-auth {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            .container {
+                margin: 1.5rem auto;
+            }
+            .add-review-box {
+                padding: 1.75rem 1.25rem;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="left-items">
+            <a href="/a" id="latest" class="tab">Последнее</a>
+            <a href="#" id="about" class="tab">О нас</a>
+            <a href="#" id="news" class="tab">Новости</a>
+            <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
+            <a href="#" id="faq" class="tab">FAQ</a>
+            <a href="#" id="contacts" class="tab">Контакты</a>
+            <a href="#" id="products" class="tab active">Товары</a>
+            <a href="#" id="gif" class="tab">GIF</a>
+            <a href="#" id="rand" class="tab">Шутки</a>
+            <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+            
+            {% if user.is_authenticated and not user.is_staff %}
+                <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="#" id="sales" class="tab">Продажи</a>
+            {% endif %}
+        </div>
+        
+        <div class="sp-auth">
+            {% if user.is_authenticated %}
+                <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="header-section">
+            <h1>Отзывы о товаре «{{ product.name }}»</h1>
+            <a href="{% url 'products_list' %}" class="btn-back">← В каталог</a>
+        </div>
+        
+        <!-- Лента существующих отзывов -->
+        <div class="reviews-feed">
+            {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <span class="review-author">👤 {{ review.author }}</span>
+                        <div class="review-rating">
+                            ⭐ <span>{{ review.rating }} / 5</span>
+                        </div>
+                    </div>
+                    <p class="review-text">{{ review.text }}</p>
+                </div>
+            {% empty %}
+                <div class="empty-reviews">
+                    <p>Пока нет отзывов о данном товаре. Поделитесь своим мнением первым!</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Секция добавления отзыва (доступна только обычным клиентам) -->
+        {% if user.is_authenticated and not user.is_staff %}
+            <div class="add-review-box">
+                <h2>Оставить отзыв</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Рендеринг встроенных Django параграфов формы со сквозными кастомными CSS стилями -->
+                    {{ form.as_p }}
+                    
+                    <button type="submit" class="btn-submit-review">Отправить отзыв</button>
+                </form>
+            </div>
+        {% endif %}
+    </main>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>

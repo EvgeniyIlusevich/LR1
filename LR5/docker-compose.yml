@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: online_shop
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./db.sqlite3:/app/db.sqlite3
+      - ./media:/app/media
+    environment:
+      - DJANGO_SETTINGS_MODULE=LR5.settings
+      - DEBUG=1
+    stdin_open: true
+    tty: true

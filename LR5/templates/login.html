@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в аккаунт</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+
+    <style>
+        /* Переменные фирменного темного стиля */
+        :root {
+            --bg-main: #0f172a;       /* Глубокий темный фон */
+            --bg-card: #1e293b;       /* Фон карточки формы */
+            --bg-navbar: rgba(15, 23, 42, 0.8);
+            --accent: #6366f1;        /* Индиго */
+            --accent-hover: #4f46e5;
+            --danger: #ef4444;        /* Красный для ошибок */
+            --text-main: #f8fafc;     /* Светлый текст */
+            --text-muted: #94a3b8;    /* Приглушенный текст */
+            --border: #334155;        /* Цвет границ */
+            --radius: 16px;
+            --transition: all 0.25s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; /* Отступ под фиксированный navbar */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Навигационная панель (минималистичная для авторизации) */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-start;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        /* Центрированный контейнер контента */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Карточка формы авторизации */
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            letter-spacing: -0.04em;
+            text-align: center;
+        }
+
+        /* Стилизация элементов формы */
+        .form-group {
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Стилизация инпутов Django (Username / Password) */
+        .auth-card input[type="text"],
+        .auth-card input[type="username"],
+        .auth-card input[type="password"] {
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .auth-card input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background-color: rgba(15, 23, 42, 0.6);
+        }
+
+        /* Блоки вывода ошибок */
+        .error-message {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        .error-summary {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            color: #fca5a5;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-summary ul {
+            list-style-position: inside;
+        }
+
+        /* Кнопка отправки формы */
+        .btn-submit {
+            width: 100%;
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 0.9rem 1rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+
+        /* Вспомогательные ссылки под формой */
+        .auth-footer {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            text-align: center;
+        }
+
+        .auth-footer a {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .auth-footer a:hover {
+            color: var(--text-main);
+            text-decoration: underline;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            .auth-card {
+                padding: 1.75rem 1.25rem;
+                border: none;
+                background-color: transparent;
+                box-shadow: none;
+            }
+            body {
+                padding-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a id="register" href="{% url 'register' %}" class="tab">Регистрация</a>
+        <a id="login" class="tab active" href="#">Вход</a>
+    </nav>
+
+    <main class="container">
+        <div class="auth-card">
+            <h1>Вход</h1>
+
+            <!-- Глобальные ошибки формы (не связанные с конкретным полем) -->
+            {% if form.non_field_errors %}
+                <div class="error-summary">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Поле: Имя пользователя -->
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="error-message">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле: Пароль -->
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">Пароль</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="error-message">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn-submit">Войти</button>
+            </form>
+
+            <!-- Ссылки для быстрой навигации -->
+            <div class="auth-footer">
+                <a href="{% url 'register' %}">Нет аккаунта? Зарегистрироваться</a>
+                <a href="{% url 'about_us' %}">Продолжить без регистрации</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>

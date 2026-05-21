@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Открытые вакансии</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+
+    <style>
+        /* Переменные фирменного темного стиля */
+        :root {
+            --bg-main: #0f172a;       /* Глубокий темный фон */
+            --bg-card: #1e293b;       /* Фон карточки вакансии */
+            --bg-navbar: rgba(15, 23, 42, 0.8);
+            --accent: #6366f1;        /* Индиго */
+            --success: #10b981;       /* Зеленый для коммерческих предложений/Оплаты */
+            --text-main: #f8fafc;     /* Светлый текст */
+            --text-muted: #94a3b8;    /* Приглушенный текст */
+            --border: #334155;        /* Границы */
+            --radius: 16px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; /* Отступ под фиксированный navbar */
+        }
+
+        /* Навигационная панель */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .left-items {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        .sp-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sp-auth span {
+            color: var(--text-muted);
+        }
+
+        .sp-auth a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .sp-auth a:hover {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+            border-color: var(--text-main);
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 800px; /* Комфортная ширина для чтения текстовых описаний */
+            margin: 3.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        /* Карточка вакансии */
+        .vacancy-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .vacancy-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Шапка карточки */
+        .vacancy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .vacancy-card h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.02em;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* Бейджик зарплаты */
+        .salary-badge {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .salary-badge.defined {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .salary-badge.negotiable {
+            background-color: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Текст описания */
+        .vacancy-description {
+            color: #cbd5e1;
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-line; /* Сохраняет абзацы, если они приходят из админки */
+        }
+
+        /* Мета-информация (Дата публикации) */
+        .vacancy-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Состояние отсутствия вакансий */
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 4rem 2rem;
+            background-color: var(--bg-card);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+        }
+
+        /* Мобильная адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            body {
+                padding-top: 130px;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            .left-items {
+                width: 100%;
+            }
+            .sp-auth {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            .container {
+                margin: 1.5rem auto;
+            }
+            .vacancy-card {
+                padding: 1.5rem;
+            }
+            .vacancy-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="body">
+
+    <nav class="navbar">
+        <div class="left-items">
+            <a href="#" id="latest" class="tab">Последнее</a>
+            <a href="#" id="about" class="tab">О нас</a>
+            <a href="#" id="news" class="tab">Новости</a>
+            <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab active">Вакансии</a>
+            <a href="#" id="faq" class="tab">FAQ</a>
+            <a href="#" id="contacts" class="tab">Контакты</a>
+            <a href="#" id="products" class="tab">Товары</a>
+            <a href="#" id="gif" class="tab">GIF</a>
+            <a href="#" id="rand" class="tab">Шутки</a>
+            <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+            
+            {% if user.is_authenticated and not user.is_staff %}
+                <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="#" id="sales" class="tab">Продажи</a>
+            {% endif %}
+        </div>
+        
+        <div class="sp-auth">
+            {% if user.is_authenticated %}
+                <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Открытые вакансии</h1>
+        
+        {% for vacancy in vacancies %}
+            <article class="vacancy-card">
+                <div class="vacancy-header">
+                    <h2>{{ vacancy.title }}</h2>
+                    
+                    {% if vacancy.salary %}
+                        <span class="salary-badge defined">{{ vacancy.salary }} BYN</span>
+                    {% else %}
+                        <span class="salary-badge negotiable">По договоренности</span>
+                    {% endif %}
+                </div>
+                
+                <div class="vacancy-description">
+                    {{ vacancy.description }}
+                </div>
+                
+                <div class="vacancy-meta">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: -1px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Опубликовано: {{ vacancy.published_date }}</span>
+                </div>
+            </article>
+        {% empty %}
+            <div class="empty-state">
+                <p>На данный момент открытых вакансий нет. Загляните позже!</p>
+            </div>
+        {% endfor %}
+    </main>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>

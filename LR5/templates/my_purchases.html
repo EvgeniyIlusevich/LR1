@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои покупки</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+
+    <style>
+        /* Благородная премиальная темная палитра */
+        :root {
+            --bg-main: #0b1121;       /* Очень глубокий темный фон */
+            --bg-card: #131c2f;       /* Плотный фон карточки/подложки */
+            --bg-hover: #1b263b;      /* Мягкий темно-синий тон при наведении (замена белому) */
+            --bg-navbar: #0b1121f2;   /* Насыщенный фон навигации */
+            
+            --accent: #6366f1;        /* Индиго */
+            --text-main: #f1f5f9;     /* Светлый основной текст */
+            --text-muted: #64748b;    /* Приглушенный серо-синий текст */
+            --border: #1e293b;        /* Темные аккуратные границы */
+            
+            --radius: 16px;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main) !important; /* Блокируем внешние белые фоны */
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; 
+            overflow-x: hidden;
+        }
+
+        /* Навигационная панель */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .left-items {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: var(--bg-hover);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        .sp-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sp-auth span {
+            color: var(--text-muted);
+        }
+
+        .sp-auth a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+            background-color: var(--bg-card);
+        }
+
+        .sp-auth a:hover {
+            background-color: var(--bg-hover);
+            border-color: var(--text-muted);
+        }
+
+        /* Контейнер контента */
+        .container {
+            max-width: 1250px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+        }
+
+        /* Обертка таблицы */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background-color: var(--bg-card) !important; /* Изолируем темный фон от внешних стилей */
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Стилизация таблицы */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+            background-color: var(--bg-card) !important;
+        }
+
+        .table th {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-bottom: 2px solid var(--border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--border);
+            background-color: transparent !important;
+        }
+
+        .table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .table td {
+            padding: 1.25rem;
+            color: var(--text-main);
+            vertical-align: top;
+            transition: var(--transition);
+        }
+
+        /* Жёсткое исправление бага: принудительный красивый темный ховер */
+        .table tbody tr:hover td {
+            background-color: var(--bg-hover) !important;
+            color: #fff !important;
+        }
+
+        /* Список товаров внутри ячейки */
+        .products-list {
+            list-style: none;
+            padding-left: 0;
+            min-width: 220px; /* Чтобы список товаров не сжимался слишком сильно */
+        }
+
+        .products-list li {
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: #cbd5e1;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .products-list li::before {
+            content: "•";
+            color: var(--accent);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Ячейка итоговой цены */
+        .total-price-cell {
+            font-weight: 700;
+            color: #34d399 !important; /* Красивый изумрудно-зеленый */
+            white-space: nowrap;
+        }
+
+        /* Предотвращаем излом служебных данных */
+        .table td:nth-child(2), /* Email */
+        .table td:nth-child(3), /* Телефон */
+        .table td:nth-child(4), /* Дата продажи */
+        .table td:nth-child(5)  /* Дата доставки */ {
+            white-space: nowrap;
+        }
+
+        /* Пустое состояние */
+        .empty-row td {
+            text-align: center;
+            color: var(--text-muted) !important;
+            padding: 5rem 2rem;
+            font-size: 1rem;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            body {
+                padding-top: 120px;
+            }
+            .sp-auth {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            .container {
+                margin: 1.5rem auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="left-items">
+            <a href="{% url 'latest_article' %}" id="latest" class="tab">Последнее</a>
+            <a href="{% url 'about_us' %}" id="about" class="tab">О нас</a>
+            <a href="{% url 'article_list' %}" id="news" class="tab">Новости</a>
+            <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
+            <a href="{% url 'faq_list' %}" id="faq" class="tab">FAQ</a>
+            <a href="{% url 'contact_list' %}" id="contacts" class="tab">Контакты</a>
+            <a href="{% url 'products_list' %}" id="products" class="tab">Товары</a>
+            <a href="{% url 'gif' %}" id="gif" class="tab">GIF</a>
+            <a href="{% url 'rand' %}" id="rand" class="tab">Шутки</a>
+            <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+            
+            {% if user.is_authenticated and not user.is_staff %}
+                <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab active">Мои покупки</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="{% url 'sale_list' %}" id="sales" class="tab">Продажи</a>
+            {% endif %}
+        </div>
+        
+        <div class="sp-auth">
+            {% if user.is_authenticated %}
+                <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                <a href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+                <a href="{% url 'login' %}">Войти</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Мои покупки</h1>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Покупатель</th>
+                        <th>Email</th>               
+                        <th>Телефон</th>          
+                        <th>Дата продажи</th>
+                        <th>Дата доставки</th>
+                        <th>Город</th>
+                        <th>Товары</th>
+                        <th>Итоговая цена</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                        <tr>
+                            <td>{{ sale.customer.first_name }} {{ sale.customer.last_name }}</td>
+                            <td>{{ sale.customer.email }}</td>  
+                            <td>{{ sale.customer.phone }}</td>    
+                            <td>{{ sale.sale_date|date:"Y-m-d" }}</td>
+                            <td>{{ sale.delivery_date|date:"Y-m-d" }}</td>
+                            <td>{{ sale.city }}</td>
+                            <td>
+                                <ul class="products-list">
+                                    {% for sale_product in sale.saleproduct_set.all %}
+                                        <li>
+                                            {{ sale_product.product.name }} 
+                                            — {{ sale_product.quantity }} {{ sale_product.product.get_unit_display }} 
+                                            ({{ sale_product.price }})
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td class="total-price-cell">{{ sale.total_price }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr class="empty-row">
+                            <td colspan="8">У вас пока нет оформленных покупок.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+</body>
+</html>

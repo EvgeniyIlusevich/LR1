@@ -1,0 +1,23 @@
+ERROR 2026-05-21 10:04:06,969 log 9076 134996786407104 Internal Server Error: /latest/
+Traceback (most recent call last):
+  File "/home/vboxuser/IGI/LR5/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vboxuser/IGI/LR5/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vboxuser/IGI/LR5/OnlineShop/views.py", line 211, in latest_article
+    latest_article_obj = Article.objects.latest('publication_date')
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vboxuser/IGI/LR5/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vboxuser/IGI/LR5/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1092, in latest
+    return self.reverse()._earliest(*fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vboxuser/IGI/LR5/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1075, in _earliest
+    return obj.get()
+           ^^^^^^^^^
+  File "/home/vboxuser/IGI/LR5/venv/lib/python3.12/site-packages/django/db/models/query.py", line 633, in get
+    raise self.model.DoesNotExist(
+OnlineShop.models.Article.DoesNotExist: Article matching query does not exist.

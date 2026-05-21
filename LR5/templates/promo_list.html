@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список промокодов</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <style>
+        /* Строгая темная палитра без белых примесей */
+        :root {
+            --bg-main: #0b1121;       /* Очень глубокий темный фон */
+            --bg-card: #131c2f;       /* Фон подложки таблицы */
+            --bg-hover: #1b263b;      /* Цвет при наведении */
+            --bg-navbar: #0b1121f2;   
+            
+            --accent: #6366f1;        /* Индиго */
+            --accent-glow: rgba(99, 102, 241, 0.2);
+            
+            /* Специальный цвет для скидки - контрастный янтарный */
+            --discount-color: #f59e0b; 
+            
+            --text-main: #f1f5f9;     /* Чистый светлый текст */
+            --text-muted: #64748b;    /* Приглушенный серо-синий текст */
+            --border: #1e293b;        
+            
+            --radius: 16px;
+            --transition: all 0.2s ease-in-out;
+            
+            /* Цвета статусов */
+            --success-text: #34d399;  
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --danger-text: #f87171;   
+            --danger-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main) !important; /* Принудительно держим темный фон */
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 80px; 
+            overflow-x: hidden;
+        }
+
+        /* Навигационная панель */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            background-color: var(--bg-navbar);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .left-items {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .left-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background-color: var(--bg-hover);
+        }
+
+        .tab.active {
+            color: #fff;
+            background-color: var(--accent);
+        }
+
+        .sp-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .sp-auth span {
+            color: var(--text-muted);
+        }
+
+        .sp-auth a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+            background-color: var(--bg-card);
+        }
+
+        .sp-auth a:hover {
+            background-color: var(--bg-hover);
+            border-color: var(--text-muted);
+        }
+
+        /* Контейнер контента */
+        .container {
+            max-width: 900px; 
+            margin: 3.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+        }
+
+        /* Обертка таблицы */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background-color: var(--bg-card) !important; /* Защита от внешнего styles.css */
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); 
+        }
+
+        /* Стилизация таблицы - Строгая фиксация макета */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            table-layout: fixed; 
+            background-color: var(--bg-card) !important;
+        }
+
+        /* Распределение ширины колонок */
+        .table th:nth-child(1), .table td:nth-child(1) { width: 50%; }
+        .table th:nth-child(2), .table td:nth-child(2) { width: 25%; text-align: center; }
+        .table th:nth-child(3), .table td:nth-child(3) { width: 25%; text-align: right; }
+
+        .table th {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+            background-color: transparent !important;
+        }
+
+        .table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .table td {
+            padding: 1rem 1.5rem;
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        /* Наведение на строку (избегаем белых вспышек) */
+        .table tbody tr:hover {
+            background-color: var(--bg-hover) !important;
+        }
+
+        /* Стилизация купона */
+        .promo-code-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .promo-code-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--accent);
+            background-color: var(--accent-glow);
+            border: 1px solid transparent;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .promo-code-badge:hover {
+            background-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .promo-code-badge svg {
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .promo-code-badge:hover svg {
+            transform: scale(1.1);
+        }
+
+        /* Колонка со скидкой — ТЕПЕРЬ ВСЕГДА ВЕЛИКОЛЕПНО ВИДНА */
+        .discount-cell {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--discount-color) !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Статусы */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge.active {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        .status-badge.inactive {
+            background-color: var(--danger-bg);
+            color: var(--danger-text);
+        }
+
+        .status-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+            flex-shrink: 0;
+        }
+
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 4rem 2rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        /* Уведомление */
+        .toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-left: 4px solid var(--success-text);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+            body {
+                padding-top: 120px;
+            }
+            .sp-auth {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+            .table {
+                table-layout: auto;
+            }
+            .table th, .table td {
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="left-items">
+            <a href="#" id="latest" class="tab">Последнее</a>
+            <a href="#" id="about" class="tab">О нас</a>
+            <a href="#" id="news" class="tab">Новости</a>
+            <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
+            <a href="#" id="faq" class="tab">FAQ</a>
+            <a href="#" id="contacts" class="tab">Контакты</a>
+            <a href="#" id="products" class="tab">Товары</a>
+            <a href="#" id="gif" class="tab">GIF</a>
+            <a href="#" id="rand" class="tab">Шутки</a>
+            <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
+            
+            {% if user.is_authenticated and not user.is_staff %}
+                <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'promo_list' %}" id="promocodes" class="tab active">Промокоды</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="#" id="sales" class="tab">Продажи</a>
+            {% endif %}
+        </div>
+        
+        <div class="sp-auth">
+            {% if user.is_authenticated %}
+                <span>Привет, <strong>{{ user.username }}</strong>!</span>
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Доступные промокоды</h1>
+
+        {% if promo_codes %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Код (нажмите для копирования)</th>
+                            <th>Размер скидки</th>
+                            <th>Статус купона</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for promo in promo_codes %}
+                        <tr>
+                            <td>
+                                <div class="promo-code-container">
+                                    <span class="promo-code-badge" data-code="{{ promo.code }}" title="Скопировать промокод">
+                                        {{ promo.code }}
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="discount-cell">{{ promo.discount_percent }}%</td>
+                            <td>
+                                {% if promo.active %}
+                                    <span class="status-badge active">Активен</span>
+                                {% else %}
+                                    <span class="status-badge inactive">Истек</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5v14"></path><path d="M9 5v14"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><rect x="2" y="5" width="20" height="14" rx="2"></rect></svg>
+                <p>На данный момент активных промокодов не обнаружено.</p>
+            </div>
+        {% endif %}
+    </main>
+
+    <div class="toast-notification" id="copy-toast">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Промокод успешно скопирован!</span>
+    </div>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const badges = document.querySelectorAll('.promo-code-badge');
+            const toast = document.getElementById('copy-toast');
+            let toastTimeout;
+
+            badges.forEach(badge => {
+                badge.addEventListener('click', function() {
+                    const codeToCopy = this.getAttribute('data-code');
+                    
+                    navigator.clipboard.writeText(codeToCopy).then(() => {
+                        toast.classList.add('show');
+                        
+                        clearTimeout(toastTimeout);
+                        toastTimeout = setTimeout(() => {
+                            toast.classList.remove('show');
+                        }, 2500);
+                    }).catch(err => {
+                        console.error('Не удалось скопировать текст: ', err);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
