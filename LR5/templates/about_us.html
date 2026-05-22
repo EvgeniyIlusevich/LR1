@@ -1,340 +1,371 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
 {% load static %}
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>О компании</title>
-    
-    <!-- Шрифты и иконки -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
 
-    <style>
-        /* Современные CSS-переменные для темной темы */
-        :root {
-            --bg-main: #0f172a;       /* Глубокий темно-синий/серый */
-            --bg-card: #1e293b;       /* Цвет карточек */
-            --bg-navbar: rgba(15, 23, 42, 0.8); /* Полупрозрачный навар */
-            --accent: #6366f1;        /* Индиго для активных элементов */
-            --accent-hover: #4f46e5;
-            --text-main: #f8fafc;     /* Белый текст */
-            --text-muted: #94a3b8;    /* Серый текст для второстепенных данных */
-            --border: #334155;        /* Тонкие границы */
-            --radius: 12px;           /* Скругление углов */
-            --transition: all 0.3s ease;
+{% block title %}О компании{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        transition: var(--transition);
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .placeholder-text {
+        font-style: italic;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 0.75rem;
+        border-radius: 6px;
+        border-left: 3px solid var(--accent);
+    }
+
+    .pickup-section {
+        grid-column: 1 / -1;
+    }
+
+    .pickup-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .pickup-point {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: var(--transition);
+    }
+
+    .pickup-point:hover {
+        background: rgba(99, 102, 241, 0.05);
+        border-color: var(--accent);
+    }
+
+    .pickup-point strong {
+        color: var(--accent);
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+
+    .calendar-section {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .calendar-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        transition: var(--transition);
+        max-width: 450px;
+        margin: 0 auto;
+    }
+
+    .calendar-card:hover {
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .calendar-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .calendar-nav-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.25rem 0.75rem;
+        border-radius: 8px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .calendar-nav-btn:hover {
+        background-color: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
+    .calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        text-align: center;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--accent);
+        font-size: 0.85rem;
+    }
+
+    .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.35rem;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        font-weight: 500;
+        background-color: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        transition: var(--transition);
+        cursor: default;
+        color: var(--text-muted);
+    }
+
+    .calendar-day.current {
+        background-color: var(--accent);
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+    }
+
+    .calendar-day.other-month {
+        opacity: 0.4;
+    }
+
+    .calendar-day:hover:not(.other-month) {
+        background-color: rgba(99, 102, 241, 0.2);
+        transform: scale(0.95);
+    }
+
+    @media (max-width: 768px) {
+        .calendar-card {
+            max-width: 100%;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        .calendar-day {
+            font-size: 0.8rem;
         }
+    }
+</style>
+{% endblock %}
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            line-height: 1.6;
-            padding-top: 80px; /* Отступ под фиксированный navbar */
-        }
+{% block content %}
+<h1>О компании</h1>
 
-        /* Стильный фиксированный Navbar */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 2rem;
-            background-color: var(--bg-navbar);
-            backdrop-filter: blur(12px); /* Эффект размытия стекла */
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* Контейнер для ссылок с авто-скроллом, если они не влезают в экран */
-        .left-items {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            overflow-x: auto;
-            white-space: nowrap;
-            padding-bottom: 5px;
-            scrollbar-width: none; /* Прячем скроллбар в Firefox */
-        }
-
-        .left-items::-webkit-scrollbar {
-            display: none; /* Прячем скроллбар в Chrome/Safari */
-        }
-
-        .tab {
-            color: var(--text-muted);
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .tab:hover {
-            color: var(--text-main);
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .tab.active {
-            color: #fff;
-            background-color: var(--accent);
-        }
-
-        /* Блок авторизации */
-        .auth-block {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.9rem;
-            margin-left: 1rem;
-            flex-shrink: 0;
-        }
-
-        .auth-block span {
-            color: var(--text-muted);
-        }
-
-        .auth-block a {
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 0.5rem 1.2rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .auth-block a:hover {
-            background-color: var(--text-main);
-            color: var(--bg-main);
-            border-color: var(--text-main);
-        }
-
-        /* Основной контейнер */
-        .container {
-            max-width: 1100px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            letter-spacing: -0.05em;
-        }
-
-        /* Сетка секций */
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
-
-        .card h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        /* Информационная строка-заглушка */
-        .placeholder-text {
-            font-style: italic;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 0.75rem;
-            border-radius: 6px;
-            border-left: 3px solid var(--accent);
-        }
-
-        /* Пункты самовывоза (выделены в полную ширину) */
-        .pickup-section {
-            grid-column: 1 / -1;
-        }
-
-        .pickup-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .pickup-point {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            transition: var(--transition);
-        }
-
-        .pickup-point:hover {
-            background: rgba(99, 102, 241, 0.05);
-            border-color: var(--accent);
-        }
-
-        .pickup-point strong {
-            color: var(--accent);
-            display: block;
-            margin-bottom: 0.25rem;
-            font-weight: 600;
-        }
-
-        /* Адаптивность для мобильных */
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 0.75rem 1rem;
-            }
-            body {
-                padding-top: 130px; /* Больше места для перенесенного блока авторизации */
-            }
-            .navbar {
-                flex-direction: column;
-                gap: 0.75rem;
-                align-items: stretch;
-            }
-            .left-items {
-                width: 100%;
-            }
-            .auth-block {
-                margin-left: 0;
-                justify-content: space-between;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
-</head>
-<body>
-
-<nav class="navbar">
-    <div class="left-items">
-        <a href="#" id="latest" class="tab">Последнее</a>
-        <a href="#" id="about" class="tab active">О нас</a>
-        <a href="#" id="news" class="tab">Новости</a>
-        <a href="{% url 'vacancy_list' %}" id="vacancies" class="tab">Вакансии</a>
-        <a href="#" id="faq" class="tab">FAQ</a>
-        <a href="#" id="contacts" class="tab">Контакты</a>
-        <a href="#" id="products" class="tab">Товары</a>
-        <a href="#" id="gif" class="tab">GIF</a>
-        <a href="#" id="rand" class="tab">Шутки</a>
-        <a href="{% url 'privacy_policy' %}" id="privacy-policy" class="tab">Политика конфиденциальности</a>
-        
-        {% if user.is_authenticated and not user.is_staff %}
-            <a href="{% url 'my_purchases' %}" id="mypurchases" class="tab">Мои покупки</a>
-        {% endif %}
-        {% if user.is_authenticated %}
-            <a href="{% url 'promo_list' %}" id="promocodes" class="tab">Промокоды</a>
-        {% endif %}
-        {% if user.is_staff %}
-            <a href="#" id="sales" class="tab">Продажи</a>
-        {% endif %}
+<div class="about-grid">
+    <div class="card">
+        <h2>Информация</h2>
+        <p>Наша компания специализируется на высококачественной дистрибуции и продаже бытовой химии через Интернет. Мы делаем упор на экологичность и скорость доставки.</p>
     </div>
 
-    <div class="auth-block">
-        {% if user.is_authenticated %}
-            <span>Привет, <strong>{{ user.username }}</strong>!</span>
-            <a href="/logout">Выйти</a>
-        {% else %}
-            <a href="/login">Войти</a>
-        {% endif %}
+    <div class="card">
+        <h2>Логотип</h2>
+        <p class="placeholder-text">*** Место для вашего фирменного логотипы *** — STRWEB</p>
     </div>
-</nav>
 
-<main class="container">
-    <h1>О компании</h1>
-    
-    <div class="about-grid">
-        <!-- Карточка 1: Описание -->
-        <div class="card">
-            <h2>Информация</h2>
-            <p>Наша компания специализируется на высококачественной дистрибуции и продаже бытовой химии через Интернет. Мы делаем упор на экологичность и скорость доставки.</p>
-        </div>
+    <div class="card">
+        <h2>История по годам</h2>
+        <p class="placeholder-text">*** Здесь развернется хронология нашего успеха *** — STRWEB</p>
+    </div>
 
-        <!-- Карточка 2: Логотип -->
-        <div class="card">
-            <h2>Логотип</h2>
-            <p class="placeholder-text">*** Место для вашего фирменного логотипы *** — STRWEB</p>
-        </div>
+    <div class="card">
+        <h2>Реквизиты</h2>
+        <p class="placeholder-text">*** Официальные юридические данные компании *** — STRWEB</p>
+    </div>
 
-        <!-- Карточка 3: История -->
-        <div class="card">
-            <h2>История по годам</h2>
-            <p class="placeholder-text">*** Здесь развернется хронология нашего успеха *** — STRWEB</p>
-        </div>
-
-        <!-- Карточка 4: Реквизиты -->
-        <div class="card">
-            <h2>Реквизиты</h2>
-            <p class="placeholder-text">*** Официальные юридические данные компании *** — STRWEB</p>
-        </div>
-
-        <!-- Карточка 5: Пункты самовывоза (на всю ширину сетки) -->
-        <div class="card pickup-section">
-            <h2>Пункты самовывоза в Минске</h2>
-            <div class="pickup-grid">
-                <div class="pickup-point">
-                    <strong>Пункт №1</strong>
-                    <span>г. Минск, ул. Немига, 5 (м. «Немига»)</span>
-                </div>
-                <div class="pickup-point">
-                    <strong>Пункт №2</strong>
-                    <span>г. Минск, пр-т Независимости, 58 (пл. Я. Коласа)</span>
-                </div>
-                <div class="pickup-point">
-                    <strong>Пункт №3</strong>
-                    <span>г. Минск, ул. Притыцкого, 97 (м. «Каменная Горка»)</span>
-                </div>
-                <div class="pickup-point">
-                    <strong>Пункт №4</strong>
-                    <span>г. Минск, ул. Богуцкого, 2 (Сухарево)</span>
-                </div>
-                <div class="pickup-point">
-                    <strong>Пункт №5</strong>
-                    <span>г. Минск, ул. Логойский тракт, 37 (рядом с ProStore)</span>
-                </div>
+    <div class="card pickup-section">
+        <h2>Пункты самовывоза в Минске</h2>
+        <div class="pickup-grid">
+            <div class="pickup-point">
+                <strong>Пункт №1</strong>
+                <span>г. Минск, ул. Немига, 5 (м. «Немига»)</span>
+            </div>
+            <div class="pickup-point">
+                <strong>Пункт №2</strong>
+                <span>г. Минск, пр-т Независимости, 58 (пл. Я. Коласа)</span>
+            </div>
+            <div class="pickup-point">
+                <strong>Пункт №3</strong>
+                <span>г. Минск, ул. Притыцкого, 97 (м. «Каменная Горка»)</span>
+            </div>
+            <div class="pickup-point">
+                <strong>Пункт №4</strong>
+                <span>г. Минск, ул. Богуцкого, 2 (Сухарево)</span>
+            </div>
+            <div class="pickup-point">
+                <strong>Пункт №5</strong>
+                <span>г. Минск, ул. Логойский тракт, 37 (рядом с ProStore)</span>
             </div>
         </div>
     </div>
-</main>
+</div>
 
-    <script src="{% static 'js/navigation.js' %}"></script>
-</body>
-</html>
+<div class="calendar-section">
+    <div class="calendar-card">
+        <div class="calendar-header">
+            <div class="calendar-title" id="calendarMonthYear">Март 2025</div>
+            <div class="calendar-nav">
+                <button class="calendar-nav-btn" id="prevMonthBtn">←</button>
+                <button class="calendar-nav-btn" id="nextMonthBtn">→</button>
+            </div>
+        </div>
+        <div class="calendar-weekdays">
+            <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+        </div>
+        <div class="calendar-days" id="calendarDaysGrid">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function() {
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        
+        const monthYearEl = document.getElementById('calendarMonthYear');
+        const daysGridEl = document.getElementById('calendarDaysGrid');
+        const prevBtn = document.getElementById('prevMonthBtn');
+        const nextBtn = document.getElementById('nextMonthBtn');
+        
+        const monthNames = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        
+        function getDaysInMonth(year, month) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+        
+        function getFirstDayIndex(year, month) {
+            let firstDay = new Date(year, month, 1).getDay();
+            return firstDay === 0 ? 6 : firstDay - 1;
+        }
+        
+        function getTodayDate() {
+            const today = new Date();
+            return {
+                year: today.getFullYear(),
+                month: today.getMonth(),
+                day: today.getDate()
+            };
+        }
+        
+        function renderCalendar() {
+            const todayInfo = getTodayDate();
+            const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+            const startOffset = getFirstDayIndex(currentYear, currentMonth);
+            const prevMonthDays = getDaysInMonth(currentYear, currentMonth - 1);
+            
+            daysGridEl.innerHTML = '';
+            
+            for (let i = 0; i < startOffset; i++) {
+                const prevDate = prevMonthDays - startOffset + i + 1;
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('calendar-day', 'other-month');
+                dayDiv.textContent = prevDate;
+                daysGridEl.appendChild(dayDiv);
+            }
+            
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('calendar-day');
+                dayDiv.textContent = d;
+                
+                if (currentYear === todayInfo.year && currentMonth === todayInfo.month && d === todayInfo.day) {
+                    dayDiv.classList.add('current');
+                }
+                
+                daysGridEl.appendChild(dayDiv);
+            }
+            
+            const totalCells = 42;
+            const currentFilled = startOffset + daysInMonth;
+            const remainingCells = totalCells - currentFilled;
+            
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('calendar-day', 'other-month');
+                dayDiv.textContent = i;
+                daysGridEl.appendChild(dayDiv);
+            }
+            
+            monthYearEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        }
+        
+        function prevMonth() {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            renderCalendar();
+        }
+        
+        function nextMonth() {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            renderCalendar();
+        }
+        
+        prevBtn.addEventListener('click', prevMonth);
+        nextBtn.addEventListener('click', nextMonth);
+        
+        renderCalendar();
+    })();
+</script>
+{% endblock %}
